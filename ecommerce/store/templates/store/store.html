@@ -22,7 +22,7 @@ then we need to load this tag into the html file that is using this static tag b
                 such that they were now within the div instead of overflowing from them.
                 Need to look into why this took place. 
                 -->
-                <h4 style="display: inline-block; float: right"><strong>${{product.price|floatformat}}</strong></h4>
+                <h4 style="display: inline-block; float: right"><strong>${{product.price|floatformat:2}}</strong></h4>
             </div>
         </div>
     {% endfor %}
