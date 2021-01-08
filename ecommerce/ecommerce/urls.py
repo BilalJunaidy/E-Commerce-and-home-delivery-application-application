@@ -15,8 +15,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include("store.urls")),
 ]
+
+
+# Need to understand why this is required tbh coz without this, my images were not being loaded.
+# The reason why I'd like to look into this is because my initial understanding was that the images would be served once you have set your 
+# MEDIA_URL to point to the correct location, but apprently that is not enough. 
+
+# Found the answer - Check the link below:
+# https://docs.djangoproject.com/en/3.1/howto/static-files/#serving-static-files-during-development
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

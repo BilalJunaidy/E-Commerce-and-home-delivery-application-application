@@ -1,14 +1,15 @@
 from django.shortcuts import render
 from pathlib import Path
+from .models import Product 
 
 # Create your views here.
 
 def store(request):
 
-    # Build paths inside the project like this: BASE_DIR / 'subdir'.
-    BASE_DIR = Path(__file__).resolve().parent.parent
-
-    context = {"key": BASE_DIR}
+    products = Product.objects.all()
+    context = {
+        "products": products 
+    }
     return render(request, "store/store.html", context)
 
 

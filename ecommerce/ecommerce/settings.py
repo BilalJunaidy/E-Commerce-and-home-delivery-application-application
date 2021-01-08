@@ -130,3 +130,9 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
 
+
+# The media root represents the location of where the uploaded files will be located in the file system.
+MEDIA_ROOT = os.path.join(BASE_DIR, 'images')
+
+# This is how we are going to be accessing the uploaded file within the browser
+MEDIA_URL = '/images/'
