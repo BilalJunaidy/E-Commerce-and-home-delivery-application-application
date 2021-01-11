@@ -1,12 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponse
 from pathlib import Path
 from .models import Customer, Product, Order, OrderItem, ShippingAddress
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json 
 
 # Create your views here.
 
 def store(request):
 
     products = Product.objects.all()
+
     context = {
         "products": products 
     }
@@ -36,6 +40,7 @@ def cart(request):
         # in the creation and saving of an Order object. 
 
         order, created = Order.objects.get_or_create(customer = customer, completed = False)
+
         items = order.orderitem.all()
         
     else: 
@@ -71,3 +76,48 @@ def checkout(request):
         "order": order,
     }
     return render(request, "store/checkout.html", context)
+
+
+
+
+"""
+    The following are api functions. 
+"""
+# @csrf_exempt
+def UpdateCart(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+
+        customer = request.user.customer 
+        product = Product.objects.get(pk = data['productid'])
+        order, created = Order.objects.get_or_create(customer = customer, completed = False)
+        
+        orderitem, created = OrderItem.objects.get_or_create(order = order, product = product)
+
+        if data['buttontype'] == 'add':
+            orderitem.quantity = orderitem.quantity + 1;  
+        else:
+            pass 
+        
+        orderitem.save()
+
+        return JsonResponse(f'{data}', safe=False)
+    else: 
+        return JsonResponse('gucci2', safe=False)
+
+
+def get_cart_total_quantity(request):
+    customer = request.user.customer 
+
+    order, created = Order.objects.get_or_create(customer = customer, completed = False)
+
+    # orderitems = self.orderitem.all()
+    # TotalQuantityInCart = sum([item.quantity for item in orderitems])
+    # print(TotalQuantityInCart)
+
+    TotalQuantityInCart = order.get_item_total_quantity()
+    print(TotalQuantityInCart)
+
+    return JsonResponse({"TotalQuantityInCart": TotalQuantityInCart})
+    
+

@@ -16,7 +16,7 @@ then we need to load this tag into the html file that is using this static tag b
                 <h6><strong>{{product.name}}</strong></h6>
                 <hr>
 
-                <button  class="btn btn-outline-secondary add-btn">Add to Cart</button>
+                <button  class="btn btn-outline-secondary add-btn" data-product_id = {{product.id}} data-button_type = "add">Add to Cart</button>
                 <a class="btn btn-outline-success" href="#">View</a>
                 <!-- Simply by adding the floatformat filter below, we were able to align each of the product prices
                 such that they were now within the div instead of overflowing from them.
