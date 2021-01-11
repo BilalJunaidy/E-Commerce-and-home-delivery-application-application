@@ -96,8 +96,9 @@ def UpdateCart(request):
 
         if data['buttontype'] == 'add':
             orderitem.quantity = orderitem.quantity + 1;  
-        else:
-            pass 
+        elif data['buttontype'] == 'remove':
+            orderitem.quantity = orderitem.quantity - 1;  
+            
         
         orderitem.save()
 
@@ -115,9 +116,7 @@ def get_cart_total_quantity(request):
     # TotalQuantityInCart = sum([item.quantity for item in orderitems])
     # print(TotalQuantityInCart)
 
-    TotalQuantityInCart = order.get_item_total_quantity()
-    print(TotalQuantityInCart)
-
+    TotalQuantityInCart = order.get_item_total_quantity
     return JsonResponse({"TotalQuantityInCart": TotalQuantityInCart})
     
 

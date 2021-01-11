@@ -32,6 +32,25 @@ document.querySelectorAll('.add-btn').forEach(function(button) {
 });
 
 
+document.querySelectorAll('.chg-quantity').forEach((button) => {
+    button.addEventListener('click', function() {
+        var product_id = this.dataset.product_id
+        var button_type = this.dataset.button_type
+        
+        if (user == 'AnonymousUser') {
+            console.log('User is not logged in')
+        }
+        else {
+            UpdateCartItem(product_id, button_type);
+        }
+
+
+    })
+})
+
+
+
+
 function UpdateCartItem(product_id, button_type) {
         console.log('User is authenticated, sending data....');
 
@@ -60,6 +79,10 @@ function UpdateCartItem(product_id, button_type) {
         
 
 }
+
+
+
+
 
         
         
