@@ -51,6 +51,27 @@ class Order(models.Model):
         orderitems = self.orderitem.all()
         total = sum([item.get_item_total for item in orderitems])
         return total 
+
+    @property
+    def physical_product(self):
+        orderitems = self.orderitem.all()
+        physical_product = False
+        for item in orderitems:
+
+            # IMPORTANT TO REMEMBER AND TO KEEP A NOTE OF THIS
+            # Initially the reason why this code was not working was because I was comparing the item.property.digital with the string 'False'
+            # when I should have been comparing it with the boolean value of False since at this point in time, we are within the python environment 
+            # and haven't converted our python boolean into Javascript strings. 
+            if item.product.digital == False:
+                physical_product = True
+            
+        return physical_product
+
+
+        
+        
+        
+
     
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True, related_name = "orderitem")

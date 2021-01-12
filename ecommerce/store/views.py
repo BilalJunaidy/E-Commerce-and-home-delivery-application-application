@@ -68,6 +68,7 @@ def checkout(request):
         order = {
             "order.get_item_total_quantity":0,
             "order.get_item_total_amount":0,
+            "order.physical_product": 'True'
         }
         items = []
     
@@ -85,7 +86,7 @@ def checkout(request):
 """
 # @csrf_exempt
 def UpdateCart(request):
-    if request.method == 'POST':
+    if request.method == 'POST' and request.user.is_authenticated:
         data = json.loads(request.body)
 
         customer = request.user.customer 
@@ -97,10 +98,18 @@ def UpdateCart(request):
         if data['buttontype'] == 'add':
             orderitem.quantity = orderitem.quantity + 1;  
         elif data['buttontype'] == 'remove':
-            orderitem.quantity = orderitem.quantity - 1;  
-            
+            orderitem.quantity = orderitem.quantity - 1; 
         
         orderitem.save()
+
+        # As per documentation, no need to save anything after the delete() method has been used. 
+        if orderitem.quantity <= 0:
+            orderitem.delete()
+
+
+            
+        
+
 
         return JsonResponse(f'{data}', safe=False)
     else: 
@@ -108,15 +117,21 @@ def UpdateCart(request):
 
 
 def get_cart_total_quantity(request):
-    customer = request.user.customer 
-
-    order, created = Order.objects.get_or_create(customer = customer, completed = False)
-
-    # orderitems = self.orderitem.all()
-    # TotalQuantityInCart = sum([item.quantity for item in orderitems])
-    # print(TotalQuantityInCart)
-
-    TotalQuantityInCart = order.get_item_total_quantity
-    return JsonResponse({"TotalQuantityInCart": TotalQuantityInCart})
     
+    if request.user.is_authenticated:
+
+        customer = request.user.customer 
+
+        order, created = Order.objects.get_or_create(customer = customer, completed = False)
+
+        # orderitems = self.orderitem.all()
+        # TotalQuantityInCart = sum([item.quantity for item in orderitems])
+        # print(TotalQuantityInCart)
+
+        TotalQuantityInCart = order.get_item_total_quantity
+        return JsonResponse({"TotalQuantityInCart": TotalQuantityInCart})
+    else: 
+        return JsonResponse('gucci111', safe=False)
+
+        
 

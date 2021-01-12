@@ -8,6 +8,7 @@
     <div class="col-lg-6">
         <div class="box-element" id="form-wrapper">
             <form id="form">
+                <h3 id="userwelcome"><small>Shipping Information:</small></h3>
                 <div id="user-info">
                     <div class="form-field">
                         <input required class="form-control" type="text" name="name" placeholder="Name..">
@@ -19,9 +20,10 @@
 
                 </div>
                 <hr>
-                    <h3><small>Shipping Information:</small></h3>
-                <hr>
+
                 <div id="shipping-info">
+
+                    <h3><small>Shipping Information:</small></h3>
                     <div class="form-field">
                         <input required class="form-control" type="text" name="address" placeholder="Address..">
                     </div>
@@ -44,9 +46,16 @@
                 <input id="form-button" class="btn btn-success btn-block" type="submit" value="Continue">
             </form>
         </div>
-
+        <br>
         <div class="box-element hidden" id="payment-info">
             <small>Payment Option</small>
+            <div>
+                <!-- <a class="btn btn-outline-success" href="#">View</a>
+                 -->
+
+                <input id="payment-button" class="btn btn-success btn-block" type="submit" value="Make Payment">
+            </div>
+            
         </div>
     </div>
 
@@ -80,5 +89,40 @@
     </div>
 
 </div>
+
+<!-- we are creating a javascript script here instead of in main.js since this particular javascript only needs to be executed within this particular html file. -->
+<script type="text/javascript">
+
+// Previously my main concern was how I was going to obtain the value of this order context passed in from our view function within our javascript script.
+// But, I guess we can do this and treat this as a string value. 
+
+    var physical_product = '{{order.physical_product}}'
+    // console.log(physical_product)
+    shippingform = document.querySelector('#shipping-info');
+    userform = document.querySelector('#user-info');
+
+    if (physical_product === "False") {
+        shippingform.classList.add("hidden");
+    }
+
+    var user = "{{request.user}}"
+    
+    if (user != 'AnonymousUser') {
+        document.querySelector("#userwelcome").innerHTML = `Welcome ${user}`;
+        userform.classList.add('hidden');
+        console.log('user is logged in, no need to show userform');
+    }
+    else {
+        userform.classList.remove('hidden');
+        console.log('user is not logged in, need to show userform');
+    }
+
+    // console.log(user)
+    // if (user == 'AnonymousUser') {
+    //     userform.classList.add("hidden");
+    // }
+    
+
+</script>
 
 {% endblock content %}

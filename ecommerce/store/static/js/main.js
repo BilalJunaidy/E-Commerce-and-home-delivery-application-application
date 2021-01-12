@@ -83,16 +83,3 @@ function UpdateCartItem(product_id, button_type) {
 
 
 
-
-        
-        
-
-        
-
-        
-
-    
-//     onsubmit = function() {
-//         console.log('this js file is linked correctly');   
-//     }
-// });
