@@ -65,12 +65,7 @@ class Order(models.Model):
             if item.product.digital == False:
                 physical_product = True
             
-        return physical_product
-
-
-        
-        
-        
+        return physical_product 
 
     
 class OrderItem(models.Model):

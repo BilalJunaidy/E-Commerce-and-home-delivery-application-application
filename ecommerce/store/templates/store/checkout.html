@@ -11,7 +11,7 @@
                 <h3 id="userwelcome"><small>Shipping Information:</small></h3>
                 <div id="user-info">
                     <div class="form-field">
-                        <input required class="form-control" type="text" name="name" placeholder="Name..">
+                        <input id = "namefield" required class="form-control" type="text" name="name" placeholder="Name..">
                     </div>
 
                     <div class="form-field">
@@ -43,7 +43,7 @@
                 </div>
 
                 <hr>
-                <input id="form-button" class="btn btn-success btn-block" type="submit" value="Continue">
+                <input id="form-button" class="btn btn-success btn-block" type="submit" value="Proceed to payment">
             </form>
         </div>
         <br>
@@ -97,16 +97,22 @@
 // But, I guess we can do this and treat this as a string value. 
 
     var physical_product = '{{order.physical_product}}'
+    var total = "{{order.get_item_total_amount}}"
+
+
     // console.log(physical_product)
     shippingform = document.querySelector('#shipping-info');
     userform = document.querySelector('#user-info');
-
+ 
     if (physical_product === "False") {
         shippingform.classList.add("hidden");
+        document.querySelector("#form-button").classList.add("hidden")
+        document.querySelector("#payment-info").classList.remove("hidden")
+
     }
 
     var user = "{{request.user}}"
-    
+
     if (user != 'AnonymousUser') {
         document.querySelector("#userwelcome").innerHTML = `Welcome ${user}`;
         userform.classList.add('hidden');
@@ -115,12 +121,91 @@
     else {
         userform.classList.remove('hidden');
         console.log('user is not logged in, need to show userform');
+    }   
+
+    
+    form = document.querySelector("#form");
+    form.addEventListener('submit', function(event) {
+        
+        // The default behaviour of the form is when the form submit button is clicked, the following happens:
+        //     - A GET request is made 
+        //     - The parameters passed are the key value pairs are from the field name and the user input 
+        //     - Since its a new GET request, the page reloads, resulting in the user inputs to be removed (hence, we get a fresh new form) 
+        // The following line of code is basically"prevents the default behaviour of the form" when its "submit" event is triggered.
+        
+        event.preventDefault()
+        // Something to note here is that the alternative approach which I am used to to prevent the form data from being submitted(i.e use return false;)
+        // is not working in this situation. I am not entirely sure why this is happening, so this could be something to look into in the next iteration of this application. 
+
+        document.querySelector("#form-button").classList.add("hidden")
+        document.querySelector("#payment-info").classList.remove("hidden")
+        
+    })
+
+    pmtbtn = document.querySelector("#payment-button")
+    pmtbtn.addEventListener('click', function() {
+        SubmitCheckoutFormData()
+    })
+    
+    function SubmitCheckoutFormData() {
+
+
+        var userFormData = {
+            'name': null,
+            'email': null,
+            'total': total,
+        }
+        var shippingFormData = {
+            'address': null,
+            'city': null,
+            'state': null,
+            'zipcode': null,
+        }
+
+        if (physical_product != "False") {
+            shippingFormData.address = form.address.value
+            shippingFormData.city = form.city.value
+            shippingFormData.state = form.state.value
+            shippingFormData.zipcode = form.zipcode.value
+        }
+
+        if (user == 'AnonymousUser') {
+            // console.log(`Name: ${form.name.value}Name`)
+            // userFormData.name = 'name'
+
+            // console.log(`Email: ${form.email.value}Email`)
+            // userFormData.email = 'email'
+        }
+
+
+
+        console.log('checkout form was just submitted', userFormData, shippingFormData)
+
+        var url = '/process_order/'
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+            }, 
+            body: JSON.stringify({
+                'form': userFormData,
+                'shipping': shippingFormData,
+            }),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log('success', data);
+            alert('Transaction Complete');
+
+            // The following command basically redirects us to the home page.
+            window.location.href = "{% url 'store' %}";
+        })
+
+
     }
 
-    // console.log(user)
-    // if (user == 'AnonymousUser') {
-    //     userform.classList.add("hidden");
-    // }
+    
     
 
 </script>
