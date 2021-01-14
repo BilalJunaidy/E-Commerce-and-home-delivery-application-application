@@ -51,7 +51,7 @@
               <a href="{% url 'cart' %}">
               <img  id="cart-icon" src="{% static 'images/cart.png' %}">
               </a>
-              <p id="cart-total">0</p>
+              <p id="cart-total">{{cartItems}}</p>
                </div>
         </div>
 
@@ -97,7 +97,46 @@
     return cookieValue;
 }
 
-const csrftoken = getCookie('csrftoken');
+const csrftoken = getCookie('csrftoken')
+
+// The following function is basically return back to us the Cart cookie object (if its available).
+// If it is not available, it will return null.  
+function getCookie(name) {
+  // Split cookie string and get all individual name=value pairs in an array
+  var cookieArr = document.cookie.split(";");
+
+  // Loop through the array element 
+  for(var i = 0; i < cookieArr.length; i++) {
+    var cookiePair = cookieArr[i].split("=");
+
+    // Removing the whitespace at the beginning of the cookie name 
+    // and compare it with the given string
+    if(name == cookiePair[0].trim()) {
+      // Decode the cookie value and return it 
+      return decodeURIComponent(cookiePair[1]);
+    }
+  }
+  // Return null if cookie is not found
+  return null;
+}
+
+// We are storing our cart cookie object into the variable called cart.
+var cart = JSON.parse(getCookie('cart'))
+
+// Over here we are checking to see if the getCookie function was not able to find a cookie with a name of cart.
+// If this is the case, then we are essentially creating a cart cookie ourserlves below. 
+if(cart == undefined) {
+  cart = {}
+  console.log('Cart was created')
+  document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
+}
+
+console.log('Cart:', cart)
+
+
+
+
+;
 
 function GetCartTotalQuantity() {
   url = '/get_cart_total_quantity/'
@@ -115,9 +154,10 @@ function GetCartTotalQuantity() {
   // .then(() => {
   //   console.log('success')
   // })
-  .then((data) => {
-            document.querySelector("#cart-total").innerHTML = data['TotalQuantityInCart'];
-        });
+
+  // .then((data) => {
+  //           document.querySelector("#cart-total").innerHTML = data['TotalQuantityInCart'];
+  //       });
 }
 
 GetCartTotalQuantity()

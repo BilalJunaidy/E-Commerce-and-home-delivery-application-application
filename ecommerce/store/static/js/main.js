@@ -19,7 +19,8 @@ document.querySelectorAll('.add-btn').forEach(function(button) {
         var button_type = this.dataset.button_type
         
         if (user == 'AnonymousUser') {
-            console.log('User is not logged in')
+            // console.log('User is not logged in')
+            addCookieItem(product_id, button_type)
         }
         else {
             UpdateCartItem(product_id, button_type);
@@ -30,6 +31,34 @@ document.querySelectorAll('.add-btn').forEach(function(button) {
         // console.log('USER:', user)
     });
 });
+
+
+function addCookieItem(productId, action) {
+    console.log('Not logged in.....')
+
+    if(action == 'add') {
+        if(cart[productId]== undefined) {
+            cart[productId] = {'quantity':1}
+        }
+        else {
+            cart[productId]['quantity'] += 1
+        }
+    }
+
+    if(action == 'remove') {
+        cart[productId]['quantity'] -= 1
+
+        if(cart[productId] <= 0) {
+            console.log('[REMOVE ITEM]')
+            delete cart[productId]
+        }
+    }
+
+    console.log('Cart:', cart)
+    document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
+    location.reload()
+}
+
 
 
 document.querySelectorAll('.chg-quantity').forEach((button) => {

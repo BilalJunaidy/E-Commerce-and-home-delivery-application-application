@@ -197,6 +197,9 @@
         .then((data) => {
             console.log('success', data);
             alert('Transaction Complete');
+            
+            cart = {}
+            document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
 
             // The following command basically redirects us to the home page.
             window.location.href = "{% url 'store' %}";

@@ -5,22 +5,35 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json 
 import datetime 
+from .utils import cookieCart, cartData
 
 # Create your views here.
 
 def store(request):
+    data = cartData(request)
+
+    cartItems = data['cartItems']
+    order = data['order']
+    items = data['items']
 
     products = Product.objects.all()
-
-    context = {
-        "products": products 
-    }
-    return render(request, "store/store.html", context)
+    context = {'products':products, 'cartItems':cartItems}
+    return render(request, 'store/store.html', context)
 
 
 def cart(request):
-    if request.user.is_authenticated:
-        customer = request.user.customer 
+    data = cartData(request)
+
+    cartItems = data['cartItems']
+    order = data['order']
+    items = data['items']
+
+    context = {'items':items, 'order':order, 'cartItems':cartItems}
+    return render(request, 'store/cart.html', context)
+
+
+    # if request.user.is_authenticated:
+    #     customer = request.user.customer 
 
         # I like this approach since initially (at least based on how the app is currently structured) there will be no Order object for each customer. 
         # Therefore, what the below get_or_create function will let us do is that when the user first tries to go to the /cart route, a new Order object 
@@ -40,44 +53,56 @@ def cart(request):
         # This way, whenever a user account is created and saved (hint: post_save signal), it would send a signal to the Order model class which would result 
         # in the creation and saving of an Order object. 
 
-        order, created = Order.objects.get_or_create(customer = customer, completed = False)
+    #     order, created = Order.objects.get_or_create(customer = customer, completed = False)
 
-        items = order.orderitem.all()
+    #     items = order.orderitem.all()
+    #     cartItems = order.get_cart_total_quantity
         
-    else: 
-        order = {
-            "order.get_item_total_quantity":0,
-            "order.get_item_total_amount":0,
-        }
-        items = []
-    
-    context = {
-        "items": items,
-        "order": order,
-    }
+    # else:
+    #     cookieData = cookieCart(request)
+    #     cartItems = cookieData['cartItems']
+    #     order = cookieData['order']
+    #     items = cookieData['items'] 
 
-    return render(request, "store/cart.html", context)
+    # products = Product.objects.all()
+    # context = {
+    #     "products":products,
+    #     "items": items,
+    #     "order": order,
+    #     'cartItems': cartItems,
+    #     }
+
+    # return render(request, "store/cart.html", context)
 
 
 def checkout(request):
-    if request.user.is_authenticated:
-        customer = request.user.customer 
-        order, created = Order.objects.get_or_create(customer = customer, completed = False)
-        items = order.orderitem.all()
+    data = cartData(request)
+
+    cartItems = data['cartItems']
+    order = data['order']
+    items = data['items']
+
+    context = {'items':items, 'order':order, 'cartItems':cartItems}
+    return render(request, 'store/checkout.html', context)
+
+    # if request.user.is_authenticated:
+    #     customer = request.user.customer 
+    #     order, created = Order.objects.get_or_create(customer = customer, completed = False)
+    #     items = order.orderitem.all()
         
-    else: 
-        order = {
-            "order.get_item_total_quantity":0,
-            "order.get_item_total_amount":0,
-            "order.physical_product": 'True'
-        }
-        items = []
+    # else: 
+    #     order = {
+    #         "get_item_total_quantity":0,
+    #         "get_item_total_amount":0,
+    #         "physical_product": 'True'
+    #     }
+    #     items = []
     
-    context = {
-        "items": items,
-        "order": order,
-    }
-    return render(request, "store/checkout.html", context)
+    # context = {
+    #     "items": items,
+    #     "order": order,
+    # }
+    # return render(request, "store/checkout.html", context)
 
 
 
@@ -134,31 +159,29 @@ def get_cart_total_quantity(request):
 def ProcessOrder(request):
     transaction_id = datetime.datetime.now().timestamp()
     data = json.loads(request.body)
-    print("Data", data)
 
     if request.user.is_authenticated:
         customer = request.user.customer
-        order, created = Order.objects.get_or_create(customer = customer, completed = False)
-        total = float(data['form']['total'])
-        order.transaction_id = transaction_id
+        order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    else:
+        customer, order = guestOrder(request, data)
 
-        if total == order.get_item_total_amount:
-            order.complete = True
-        order.save()
+    total = float(data['form']['total'])
+    order.transaction_id = transaction_id
 
-        if order.physical_product == True:
-            ShippingAddress.objects.create(
-                customer = customer,
-                order = order, 
-                address = data['shipping']['address']
-                city = data['shipping']['city']
-                state = data['shipping']['state']
-                zipcode = data['shipping']['zipcode']
-            )
+    if total == order.get_cart_total:
+        order.complete = True
+    order.save()
 
+    if order.shipping == True:
+        ShippingAddress.objects.create(
+        customer=customer,
+        order=order,
+        address=data['shipping']['address'],
+        city=data['shipping']['city'],
+        state=data['shipping']['state'],
+        zipcode=data['shipping']['zipcode'],
+        )
 
-    
-    else: 
-        print("user is not authenticated")
-    return JsonResponse('Payment completed and order processed', safe=False)
+    return JsonResponse('Payment submitted..', safe=False)
 
